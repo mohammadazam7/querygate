@@ -12,16 +12,15 @@ import sys
 from collections.abc import Sequence
 
 from querygate import __version__
-from querygate.gate import Policy, Refused, check
+from querygate.gate import RULE_DESCRIPTIONS, Policy, Refused, Rule, check
 
 
 def _parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="querygate", description=__doc__.splitlines()[0])
-    p.add_argument("sql", help="the query to check, or - to read it from standard input")
+    p.add_argument("sql", nargs="?", help="the query to check, or - to read it from standard input")
     p.add_argument(
         "--allow",
         action="append",
-        required=True,
         metavar="PATTERN",
         help="table pattern the query may read, such as 'marts.*'; repeatable",
     )
@@ -35,12 +34,23 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--max-rows", type=int, default=1000, help="row limit to enforce")
     p.add_argument("--dialect", default="duckdb", help="SQL dialect of the target database")
     p.add_argument("--json", action="store_true", help="print the verdict as one JSON object")
+    p.add_argument("--rules", action="store_true", help="list each rule and what it refuses")
     p.add_argument("--version", action="version", version=f"querygate {__version__}")
     return p
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args = parser.parse_args(argv)
+    if args.rules:
+        width = max(len(rule.value) for rule in Rule)
+        for rule in Rule:
+            print(f"{rule.value:<{width}}  {RULE_DESCRIPTIONS[rule]}")
+        return 0
+    if args.sql is None:
+        parser.error("the following arguments are required: sql")
+    if not args.allow:
+        parser.error("the following arguments are required: --allow")
     sql = sys.stdin.read() if args.sql == "-" else args.sql
     try:
         policy = Policy.of(
