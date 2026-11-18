@@ -4,6 +4,7 @@ import json
 import pytest
 
 from querygate.cli import main
+from querygate.gate import RULE_DESCRIPTIONS, Rule
 
 ALLOW = ["--allow", "marts.*"]
 
@@ -46,3 +47,20 @@ def test_the_query_can_come_from_standard_input(
 def test_a_bad_policy_exits_2(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["select 1", *ALLOW, "--max-rows", "0"]) == 2
     assert "positive" in capsys.readouterr().err
+
+
+def test_rules_lists_every_rule_without_other_arguments(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["--rules"]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert len(lines) == len(Rule)
+    for rule, line in zip(Rule, lines, strict=True):
+        assert line.split()[0] == rule.value
+        assert line.endswith(RULE_DESCRIPTIONS[rule])
+
+
+def test_a_query_still_requires_allow(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exit_info:
+        main(["select 1"])
+    assert exit_info.value.code == 2
