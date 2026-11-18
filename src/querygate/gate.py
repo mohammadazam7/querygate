@@ -33,6 +33,19 @@ class Rule(Enum):
     LIMIT = "limit"
 
 
+RULE_DESCRIPTIONS: dict[Rule, str] = {
+    Rule.PARSE: "the query does not parse in the target dialect",
+    Rule.SINGLE_STATEMENT: "more than one statement was passed",
+    Rule.READ_ONLY: "writes, DDL, settings and other statements that are not a plain SELECT",
+    Rule.FUNCTION: "a function that reads files, calls other servers, sleeps or changes state",
+    Rule.TABLE: "a table outside the allowed patterns",
+    Rule.QUALIFY: "a table named without its schema, so the policy cannot judge it",
+    Rule.SOURCE: "a table function, or a file used as a table",
+    Rule.COLUMN: "a column marked as never readable",
+    Rule.LIMIT: "a LIMIT that is not a plain number",
+}
+
+
 class Refused(ValueError):
     """The query may not run. ``rule`` says which check failed; the message says why
     in words that can be handed back to the model so it can fix the query."""

@@ -12,18 +12,19 @@ import sys
 from collections.abc import Sequence
 
 from querygate import __version__
-from querygate.gate import Policy, Refused, check
+from querygate.gate import RULE_DESCRIPTIONS, Policy, Refused, Rule, check
 
 
 def _parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="querygate", description=__doc__.splitlines()[0])
-    p.add_argument("sql", help="the query to check, or - to read it from standard input")
+    p.add_argument("sql", nargs="?", help="the query to check, or - to read it from standard input")
     p.add_argument(
         "--allow",
         action="append",
-        required=True,
+        default=[],
         metavar="PATTERN",
-        help="table pattern the query may read, such as 'marts.*'; repeatable",
+        help="table pattern the query may read, such as 'marts.*'; repeatable, "
+        "required to check a query",
     )
     p.add_argument(
         "--deny-column",
@@ -31,6 +32,11 @@ def _parser() -> argparse.ArgumentParser:
         default=[],
         metavar="COLUMN",
         help="column that may never be read, bare or as table.column; repeatable",
+    )
+    p.add_argument(
+        "--rules",
+        action="store_true",
+        help="print every rule and what it refuses, then exit; needs no query or --allow",
     )
     p.add_argument("--max-rows", type=int, default=1000, help="row limit to enforce")
     p.add_argument("--dialect", default="duckdb", help="SQL dialect of the target database")
@@ -40,7 +46,16 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args = parser.parse_args(argv)
+    if args.rules:
+        for rule in Rule:
+            print(f"{rule.value:<16} {RULE_DESCRIPTIONS[rule]}")
+        return 0
+    if args.sql is None:
+        parser.error("the following arguments are required: sql")
+    if not args.allow:
+        parser.error("the following arguments are required: --allow")
     sql = sys.stdin.read() if args.sql == "-" else args.sql
     try:
         policy = Policy.of(
