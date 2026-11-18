@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Security
+- SQLite's `readfile`, `writefile`, `edit`, `fsdir` and `load_extension` were allowed
+  inside a SELECT; `writefile` writes to the database host's disk. They are now refused.
+- Oracle calls into the `UTL_`, `DBMS_` and `OWA_` packages (network, file, job and mail
+  access) and the `HTTPURITYPE` family are now refused, including when written with the
+  `SYS.` prefix.
+
 ## [0.1.0] - 2026-11-16
 
 ### Added

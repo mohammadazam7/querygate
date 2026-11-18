@@ -72,8 +72,15 @@ BLOCKED_FUNCTIONS = frozenset(
         "openrowset", "opendatasource", "openquery", "xp_cmdshell",
         # BigQuery, Snowflake
         "external_query", "system$wait",
+        # SQLite (fileio and extension loading)
+        "readfile", "writefile", "edit", "fsdir", "load_extension",
+        # Oracle (object types that open network connections)
+        "httpuritype", "dburitype", "xdburitype",
     }
 )  # fmt: skip
+# Package-qualified calls such as Oracle's utl_http.request(...) are refused by package:
+# these packages read files, open sockets, send mail, run jobs or call Java.
+BLOCKED_PACKAGE_PREFIXES = ("utl_", "dbms_", "owa_", "sys.utl_", "sys.dbms_")
 
 
 @dataclass(frozen=True)
@@ -168,6 +175,11 @@ def _check_read_only(tree: exp.Expression) -> None:
             name = (node.name or node.sql_name()).lower()
             if name in BLOCKED_FUNCTIONS:
                 raise Refused(Rule.FUNCTION, f"function {name} is not allowed")
+        if isinstance(node, exp.Dot) and isinstance(node.expression, exp.Func):
+            package = node.this.sql().lower()
+            if package.startswith(BLOCKED_PACKAGE_PREFIXES):
+                called = f"{package}.{node.expression.name.lower()}"
+                raise Refused(Rule.FUNCTION, f"function {called} is not allowed")
 
 
 def _tables(tree: exp.Expression, policy: Policy) -> tuple[str, ...]:

