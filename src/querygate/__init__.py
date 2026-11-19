@@ -8,4 +8,4 @@ from denied columns, and carry a row limit.
 from querygate.gate import Checked, Policy, Refused, Rule, check
 
 __all__ = ["Checked", "Policy", "Refused", "Rule", "check"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"

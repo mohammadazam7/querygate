@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-18
+
+### Added
+- `querygate --rules` lists every rule with a one-line description of what it refuses.
+  Thanks to @P1LOTRX (#2).
+
 ### Security
 - SQLite's `readfile`, `writefile`, `edit`, `fsdir` and `load_extension` were allowed
   inside a SELECT; `writefile` writes to the database host's disk. They are now refused.

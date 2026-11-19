@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "querygate"
-version = "0.1.0"
+version = "0.1.1"
 description = "A SQL firewall for AI agents: model-written queries are parsed and checked before they reach a database."
 readme = "README.md"
 requires-python = ">=3.11"
