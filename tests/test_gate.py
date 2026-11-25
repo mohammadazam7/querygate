@@ -222,3 +222,33 @@ def test_a_policy_must_allow_something_and_have_a_positive_limit() -> None:
 def test_the_refusal_message_can_be_shown_to_the_model() -> None:
     with pytest.raises(Refused, match=r"table raw\.customers is not allowed"):
         check("select * from raw.customers", POLICY)
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "select count(*) from marts.customers",
+        "select region, count(*) from marts.customers group by region",
+        "select count(*) filter (where region = 'EU') from marts.customers",
+    ],
+)
+def test_count_star_is_not_a_wildcard_read(sql: str) -> None:
+    policy = Policy.of(["marts.*"], deny_columns=["email"])
+    assert check(sql, policy).tables == ("marts.customers",)
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "select * from marts.customers",
+        "select c.* from marts.customers c",
+        "select count(*), * from marts.customers group by all",
+        "select count(*) filter (where email like 'a%') from marts.customers",
+        "select count(*) from (select * from marts.customers) q",
+    ],
+)
+def test_counting_does_not_excuse_a_real_wildcard_or_a_denied_column(sql: str) -> None:
+    policy = Policy.of(["marts.*"], deny_columns=["email"])
+    with pytest.raises(Refused) as refused:
+        check(sql, policy)
+    assert refused.value.rule is Rule.COLUMN

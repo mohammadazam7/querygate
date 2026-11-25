@@ -232,7 +232,8 @@ def _check_columns(tree: exp.Expression, tables: tuple[str, ...], policy: Policy
     for column in tree.find_all(exp.Column):
         if column.name.lower() in denied:
             raise Refused(Rule.COLUMN, f"column {column.name} may not be read")
-    if any(True for _ in tree.find_all(exp.Star)):
+    # count(*) counts rows and reveals no column, so it is not a wildcard read.
+    if any(not isinstance(star.parent, exp.Count) for star in tree.find_all(exp.Star)):
         hidden = ", ".join(sorted(denied))
         raise Refused(
             Rule.COLUMN, f"name the columns instead of *: these may not be read: {hidden}"

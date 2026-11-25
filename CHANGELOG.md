@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- `count(*)` was refused as a wildcard read whenever the policy denied a column. It
+  counts rows and reveals no column, so it is now allowed; a real `*` and a denied
+  column inside `count(*) filter (...)` are still refused.
+
 ## [0.1.1] - 2026-11-18
 
 ### Added
