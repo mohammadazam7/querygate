@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-26
+
 ### Added
 - A browser playground (`playground/`) that runs the package itself on Pyodide: edit a
   policy and a query and see the decision. Its examples are tested against the wheel
