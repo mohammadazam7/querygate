@@ -21,6 +21,17 @@ check("select email from marts.customers", policy)
 # Refused: column email may not be read
 ```
 
+## Try it in your browser
+
+[![The playground: rules on the left, a query on the right, and the decision stamped below](docs/images/playground.png)](https://mohammadazam7.github.io/querygate/)
+
+[mohammadazam7.github.io/querygate](https://mohammadazam7.github.io/querygate/) runs this
+package in the page, on Pyodide, with no server. Edit the allowed tables, the denied
+columns or the row limit, paste a query, and see whether it is allowed (and what is sent
+to the database instead) or refused (and by which rule). The examples on the page are
+checked in CI against the same wheel the page loads, so a label can never promise a
+decision the package does not make.
+
 ## Why
 
 Giving an agent a database connection means running SQL written by something that can

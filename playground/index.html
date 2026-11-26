@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>querygate playground: should this query run?</title>
+    <meta
+      name="description"
+      content="Try querygate, a SQL firewall for AI agents. Edit the rules, paste a query a model might write, and see it allowed or refused. The real Python package runs in your browser."
+    />
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <span class="wordmark">querygate</span>
+        <span class="runtime" id="runtime" role="status">Starting Python in your browser</span>
+        <a href="https://github.com/mohammadazam7/querygate">Source and install</a>
+      </header>
+
+      <main>
+        <h1>An AI wrote this query. Should it run?</h1>
+        <p class="standfirst">
+          querygate reads every query before it reaches the database and stops the ones that
+          could do damage. Change the rules or the query and watch the decision change.
+        </p>
+
+        <div class="bench">
+          <section class="rules" aria-labelledby="rules-title">
+            <h2 id="rules-title">The rules</h2>
+            <label for="allow">Tables it may read</label>
+            <input id="allow" spellcheck="false" autocomplete="off" />
+            <p class="hint">Patterns such as marts.* separated by commas.</p>
+            <label for="deny">Columns it may never read</label>
+            <input id="deny" spellcheck="false" autocomplete="off" />
+            <label for="max-rows">Most rows it may return</label>
+            <input id="max-rows" inputmode="numeric" autocomplete="off" />
+            <p class="field-error" id="policy-error" role="alert" hidden></p>
+          </section>
+
+          <section class="query" aria-labelledby="query-title">
+            <h2 id="query-title">The query</h2>
+            <textarea id="sql" spellcheck="false" rows="6" aria-describedby="examples-title"></textarea>
+            <h3 id="examples-title">Or try what a model might write</h3>
+            <ul class="examples" id="examples"></ul>
+          </section>
+        </div>
+
+        <section class="verdict" id="verdict" aria-live="polite" aria-labelledby="verdict-title">
+          <h2 id="verdict-title" class="visually-hidden">Decision</h2>
+          <div class="stamp" id="stamp">Checking</div>
+          <div class="ruling">
+            <p class="reason" id="reason">The decision appears here as soon as Python has started.</p>
+            <div id="detail"></div>
+          </div>
+        </section>
+
+        <section class="rulebook" aria-labelledby="rulebook-title">
+          <h2 id="rulebook-title">Everything it refuses</h2>
+          <ul id="rulebook"></ul>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          This page runs the querygate Python package itself, on Pyodide (Python compiled to
+          WebAssembly). Nothing you type leaves your browser.
+        </p>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
