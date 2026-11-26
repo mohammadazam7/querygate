@@ -44,3 +44,25 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.lock && pip install -e . --no-deps
       - run: pytest --cov=querygate --cov-report=term-missing
+
+  playground:
+    name: Playground (type-check, test, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: playground
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: playground/package-lock.json
+      - run: npm ci
+      - run: npm run prepare-py
+      - run: npx tsc --noEmit
+      - run: npx vitest run
+      - run: npx vite build

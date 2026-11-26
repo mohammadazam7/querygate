@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- A browser playground (`playground/`) that runs the package itself on Pyodide: edit a
+  policy and a query and see the decision. Its examples are tested against the wheel
+  the page loads.
+
 ### Fixed
 - `count(*)` was refused as a wildcard read whenever the policy denied a column. It
   counts rows and reveals no column, so it is now allowed; a real `*` and a denied
